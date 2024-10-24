@@ -27,7 +27,7 @@ static DEFAULT_VERTICES: [Vec2; 4] = [Vec2(-1.0, -1.0), Vec2(1.0, -1.0), Vec2(1.
 static DEFAULT_INDICES: [u16; 6] = [0, 1, 2, 0, 2, 3];
 
 
-const SIM_SIZE: u32 = 512;
+const SIM_SIZE: u32 = 256;
 
 
 fn main() {
@@ -50,7 +50,9 @@ fn main() {
 	let mut a_current = true;
 	
 	
-	let mut mouse_down = false;
+	let mut mouse_l_down = false;
+	let mut mouse_r_down = false;
+	let mut mouse_m_down = false;
 	let mut ctrl_pressed = false;
 	let mut previous_mouse_position: Option<PhysicalPosition<f64>> = None;
 	
@@ -84,32 +86,51 @@ fn main() {
 					}
 				}
 				WindowEvent::MouseInput { state, button, .. } => {
-					if button == MouseButton::Left {
-						mouse_down = match state {
-							ElementState::Pressed => true,
-							ElementState::Released => false
-						};
+					let pressed = match state {
+						ElementState::Pressed => true,
+						ElementState::Released => false,
+					};
+					
+					match button {
+						MouseButton::Left => mouse_l_down = pressed,
+						MouseButton::Right => mouse_r_down = pressed,
+						MouseButton::Middle => mouse_m_down = pressed,
+						_ => ()
+					}
+					
+					if mouse_l_down || mouse_r_down || mouse_m_down {
+						let color = (
+							if mouse_l_down {1.0} else {0.0},
+							if mouse_r_down {1.0} else {0.0},
+							if mouse_m_down {1.0} else {0.0},
+						);
 						
-						if mouse_down {
-							if let Some(position) = previous_mouse_position {
-								(if a_current {&state_texture_a} else {&state_texture_b}).write(Rect {
-									left: (position.x / width as f64 * SIM_SIZE as f64 - 5.0).clamp(0.0, SIM_SIZE as f64 - 10.0) as u32,
-									bottom: ((1.0 - position.y / height as f64) * SIM_SIZE as f64 - 5.0).clamp(0.0, SIM_SIZE as f64 - 10.0) as u32,
-									width: 11,
-									height: 11,
-								}, (0..=10).map(|x| (0..=10).map(|y| if (x-5)*(x-5) + (y-5)*(y-5) <= 30 {(1.0, 1.0, 1.0)} else {(0.0, 0.0, 0.0)}).collect()).collect::<Vec<_>>());
-							}
+						if let Some(position) = previous_mouse_position {
+							(if a_current {&state_texture_a} else {&state_texture_b}).write(Rect {
+								left: (position.x / width as f64 * SIM_SIZE as f64 - 5.0).clamp(0.0, SIM_SIZE as f64 - 11.0) as u32,
+								bottom: ((1.0 - position.y / height as f64) * SIM_SIZE as f64 - 5.0).clamp(0.0, SIM_SIZE as f64 - 11.0) as u32,
+								width: 11,
+								height: 11,
+							}, (0..=10).map(|x| (0..=10).map(|y| if (x-5)*(x-5) + (y-5)*(y-5) <= 30 {color} else {(0.0, 0.0, 0.0)}).collect()).collect::<Vec<_>>());
 						}
 					}
 				}
 				WindowEvent::CursorMoved { position, .. } => {
-					if mouse_down {
-						(if a_current {&state_texture_a} else {&state_texture_b}).write(Rect {
-							left: (position.x / width as f64 * SIM_SIZE as f64 - 5.0).clamp(0.0, SIM_SIZE as f64 - 10.0) as u32,
-							bottom: ((1.0 - position.y / height as f64) * SIM_SIZE as f64 - 5.0).clamp(0.0, SIM_SIZE as f64 - 10.0) as u32,
-							width: 11,
-							height: 11,
-						}, (0..=10).map(|x| (0..=10).map(|y| if (x-5)*(x-5) + (y-5)*(y-5) <= 30 {(1.0, 1.0, 1.0)} else {(0.0, 0.0, 0.0)}).collect()).collect::<Vec<_>>());
+					if mouse_l_down || mouse_r_down || mouse_m_down {
+						let color = (
+							if mouse_l_down {1.0} else {0.0},
+							if mouse_r_down {1.0} else {0.0},
+							if mouse_m_down {1.0} else {0.0},
+						);
+						
+						if let Some(position) = previous_mouse_position {
+							(if a_current {&state_texture_a} else {&state_texture_b}).write(Rect {
+								left: (position.x / width as f64 * SIM_SIZE as f64 - 5.0).clamp(0.0, SIM_SIZE as f64 - 11.0) as u32,
+								bottom: ((1.0 - position.y / height as f64) * SIM_SIZE as f64 - 5.0).clamp(0.0, SIM_SIZE as f64 - 11.0) as u32,
+								width: 11,
+								height: 11,
+							}, (0..=10).map(|x| (0..=10).map(|y| if (x-5)*(x-5) + (y-5)*(y-5) <= 30 {color} else {(0.0, 0.0, 0.0)}).collect()).collect::<Vec<_>>());
+						}
 					}
 					
 					previous_mouse_position = Some(position);
