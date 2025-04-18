@@ -56,8 +56,8 @@ void main() {
 	);
 	
 	const float own_spread = 0.015;
-	const float pred_spread = 0.7;
-	const float grow_spread = 0.7;
+	const float pred_spread = 0.5;
+	const float grow_spread = 0.5;
 	
 	const mat3 spread = mat3(
 		vec3(own_spread, grow_spread, pred_spread),
@@ -69,8 +69,8 @@ void main() {
 	
 	mat3 b = matrixCompMult(a, a);
 	
-	const float predation = 0.7;
-	const float growth = 0.7;
+	const float predation = 0.0;
+	const float growth = 0.0;
 	
 	const mat3 dvdt_min = mat3(
 		vec3(-1.0, 0.0, -predation),
